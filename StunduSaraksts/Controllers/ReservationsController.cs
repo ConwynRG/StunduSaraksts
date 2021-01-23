@@ -86,6 +86,7 @@ namespace StunduSaraksts.Controllers
             }
             ViewData["Owner"] = new SelectList(_context.AspNetUsers, "Id", "Id", reservation.Owner);
             ViewData["Room"] = new SelectList(_context.Rooms, "Id", "Name", reservation.Room);
+            ViewData["Duration"] = reservation.EndTime.TimeOfDay - reservation.StartTime.TimeOfDay;
             return View(reservation);
         }
 
