@@ -9,7 +9,13 @@ namespace StunduSaraksts.ModelsDB
 {
     public partial class AspNetUser
     {
-        public bool isStudent()
+
+        /*public bool IsStudent()
+        {
+            return this.Students.Count > 0;
+        }*/
+
+        public bool IsStudent()
         {
             using (StunduSarakstsContext context = new StunduSarakstsContext())
             {
@@ -17,7 +23,25 @@ namespace StunduSaraksts.ModelsDB
             }
         }
 
-        public bool isTeacher()
+        /*public Student GetStudent()
+        {
+            return this.Students.FirstOrDefault();
+        }*/
+
+        public Student GetStudent()
+        {
+            using (StunduSarakstsContext context = new StunduSarakstsContext())
+            {
+                return context.Students.Where(s => s.Account == this.Id).FirstOrDefault();
+            }
+        }
+
+        /*public bool IsTeacher()
+        {
+            return this.Teachers.Count > 0;
+        }*/
+
+        public bool IsTeacher()
         {
             using (StunduSarakstsContext context = new StunduSarakstsContext())
             {
@@ -25,7 +49,25 @@ namespace StunduSaraksts.ModelsDB
             }
         }
 
-        public bool isAdmin()
+        /*public Teacher GetTeacher()
+        {
+            return this.Teachers.FirstOrDefault();
+        }
+*/
+        public Teacher GetTeacher()
+        {
+            using (StunduSarakstsContext context = new StunduSarakstsContext())
+            {
+                return context.Teachers.Where(s => s.Account == this.Id).FirstOrDefault();
+            }
+        }
+
+        /*public bool IsAdmin()
+        {
+            return IsTeacher() && GetTeacher().IsAdmin==true;
+        }*/
+
+        public bool IsAdmin()
         {
             using (var context = new StunduSarakstsContext())
             {

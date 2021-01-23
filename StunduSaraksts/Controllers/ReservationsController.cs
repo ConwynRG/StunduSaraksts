@@ -28,7 +28,7 @@ namespace StunduSaraksts.Controllers
             //Trace.WriteLine(currentUser);
             //Trace.Write("Id: ");
             //Trace.WriteLine(User.Identity.Name);
-            if (currentUser is not null && currentUser.isAdmin())
+            if (currentUser is not null && currentUser.IsAdmin())
             {
                 ViewData["admin"] = "Admin";
             }
