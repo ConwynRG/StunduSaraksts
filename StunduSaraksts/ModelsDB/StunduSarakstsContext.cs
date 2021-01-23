@@ -275,9 +275,10 @@ namespace StunduSaraksts.ModelsDB
 
             modelBuilder.Entity<ConsultationAttendance>(entity =>
             {
-                entity.HasNoKey();
-
+                
                 entity.ToTable("ConsultationAttendance");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.Comment)
                     .IsRequired()
