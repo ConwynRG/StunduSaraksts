@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -18,9 +19,23 @@ namespace StunduSaraksts.Controllers
             _context = context;
         }
 
+
         // GET: Reservations
         public async Task<IActionResult> Index()
         {
+
+            var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            //Trace.WriteLine(currentUser);
+            //Trace.Write("Id: ");
+            //Trace.WriteLine(User.Identity.Name);
+            if (currentUser is not null && currentUser.isAdmin())
+            {
+                ViewData["admin"] = "Admin";
+            }
+            else
+            {
+                ViewData["admin"] = "Peasant";
+            }
             var stunduSarakstsContext = _context.Reservations.Include(r => r.OwnerNavigation).Include(r => r.RoomNavigation);
             return View(await stunduSarakstsContext.ToListAsync());
         }
