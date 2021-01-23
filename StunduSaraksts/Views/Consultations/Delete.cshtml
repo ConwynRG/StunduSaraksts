@@ -1,0 +1,63 @@
+﻿@model StunduSaraksts.ModelsDB.Consultation
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Consultation</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.StartTime)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.StartTime)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.EndTime)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.EndTime)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.RegisterDate)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.RegisterDate)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Comment)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Comment)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Canceled)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Canceled)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.RoomReservationNavigation)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.RoomReservationNavigation.Owner)
+        </dd class>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TeacherNavigation)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TeacherNavigation.Account)
+        </dd class>
+    </dl>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>

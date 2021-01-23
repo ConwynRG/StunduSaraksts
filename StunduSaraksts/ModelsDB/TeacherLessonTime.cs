@@ -7,6 +7,7 @@ namespace StunduSaraksts.ModelsDB
 {
     public partial class TeacherLessonTime
     {
+        public int Id { get; set; }
         public int Teacher { get; set; }
         public int Day { get; set; }
         public int LessonTime { get; set; }

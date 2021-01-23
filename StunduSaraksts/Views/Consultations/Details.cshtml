@@ -1,0 +1,60 @@
+﻿@model StunduSaraksts.ModelsDB.Consultation
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Consultation</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.StartTime)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.StartTime)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.EndTime)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.EndTime)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.RegisterDate)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.RegisterDate)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Comment)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Comment)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Canceled)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Canceled)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.RoomReservationNavigation)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.RoomReservationNavigation.Owner)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TeacherNavigation)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TeacherNavigation.Account)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
