@@ -84,7 +84,7 @@
                         @item.RoomNavigation.Name
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.RequestComment)
+                        <pre class="text-break" style="font-family: inherit; font-size: inherit">@Html.DisplayFor(modelItem => item.RequestComment)</pre>
                     </td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
@@ -114,7 +114,7 @@
                         @item.RoomNavigation.Name
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.RequestComment)
+                        <pre class="text-break" style="font-family: inherit; font-size: inherit">@Html.DisplayFor(modelItem => item.RequestComment)</pre>
                     </td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
@@ -144,7 +144,7 @@
                         @item.RoomNavigation.Name
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.RequestComment)
+                        <pre class="text-break" style="font-family: inherit; font-size: inherit">@Html.DisplayFor(modelItem => item.RequestComment)</pre>
                     </td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
@@ -206,13 +206,13 @@ else
                         @item.RoomNavigation.Name
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.RequestComment)
+                        <pre class="text-break" style="font-family: inherit; font-size: inherit">@Html.DisplayFor(modelItem => item.RequestComment)</pre>
                     </td>
                     <td>
                         @((item.Accepted == null) ? "Nav apskatīts" : (item.Accepted == true) ? "Apstiprināts" : "Noraidīts")
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.ReplyComment)
+                        <pre class="text-break" style="font-family: inherit; font-size: inherit">@Html.DisplayFor(modelItem => item.ReplyComment)</pre>
                     </td>
                     <td>
                         <form asp-action="Delete">
