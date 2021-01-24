@@ -4,12 +4,12 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<h1>Konsultācija</h1>
 
-<h4>Consultation</h4>
+<h4>Izveidot</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-8">
         @if (ViewBag.ErrorMessage != null)
         {
         <div class="alert alert-danger">
@@ -18,56 +18,75 @@
         }
         else
         {
-            <form asp-action="Create">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <!--
-            <div class="form-group">
-                <label asp-for="Teacher" class="control-label"></label>
-                <select asp-for="Teacher" class ="form-control" asp-items="ViewBag.Teachers"></select>
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <!--
+    <div class="form-group">
+        <label asp-for="Teacher" class="control-label"></label>
+        <select asp-for="Teacher" class ="form-control" asp-items="ViewBag.Teachers"></select>
+    </div>
+    <div class="form-group row">
+        <label asp-for="Date" class="control-label col-sm-2 col-form-label">Datums</label>
+        <div class="col-sm-10">
+            <input asp-for="Date" type="date" class="form-control" />
+        </div>
+        <span asp-validation-for="Date" class="text-danger"></span>
+    </div>
+    -->
+
+        <div class="form-group row">
+            <label asp-for="Date" class="control-label col-sm-2 col-form-label">Datums</label>
+            <div class="col-sm-10">
+                <input asp-for="Date" type="date" class="form-control" />
             </div>
-            -->
+            <span asp-validation-for="Date" class="text-danger"></span>
 
-                <div class="form-group">
-                    <label asp-for="Date" class="control-label">Consultation start time:</label>
-                    <input asp-for="Date" type="date" class="form-control" />
-                    <span asp-validation-for="Date" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <label asp-for="StartTime" class="control-label col-sm-2 col-form-label">Sākuma laiks</label>
+            <div class="col-sm-10">
+                <input asp-for="StartTime" type="time" class="form-control" />
+            </div>
+            <span asp-validation-for="StartTime" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <label asp-for="EndTime" class="control-label col-sm-2 col-form-label">Beigu laiks</label>
+            <div class="col-sm-10">
+                <input asp-for="EndTime" type="time" class="form-control" />
+            </div>
+            <span asp-validation-for="EndTime" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <label asp-for="isOnline" class="control-label col-sm-2 col-form-label">Attālināti</label>
+            <div class="col-sm-10">
+                <input id="isOnline" asp-for="isOnline" onclick="toggleVisibility()">
+            </div>
+        </div>
+        <div id="RoomForm" class="form-group row">
+            <label asp-for="Room" class="control-label col-sm-2 col-form-label">Kabineta nr.</label>
+            <div class="col-sm-10">
+                <select asp-for="Room" class="form-control" asp-items="ViewBag.Rooms"></select>
+            </div>
+            <span asp-validation-for="Room" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <label asp-for="Comment" class="control-label col-sm-2 col-form-label">Apraksts</label>
+            <div class="col-sm-10">
+                <textarea asp-for="Comment" class="form-control"></textarea>
+            </div>
+            <span asp-validation-for="Comment" class="text-danger"></span>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-2"></div>
+            <div class="form-group col-sm-10">
+                <input type="submit" value="Izveidot" class="btn btn-primary" />
+                <button class="float-right btn btn-primary" asp-action="Index">Atcelt</button>
+            </div>
+        </div>
 
-                </div>
-                <div class="form-group">
-                    <label asp-for="StartTime" class="control-label">Consultation start time:</label>
-                    <input asp-for="StartTime" type="time" class="form-control" />
-                    <span asp-validation-for="StartTime" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="EndTime" class="control-label">Consultation end time</label>
-                    <input asp-for="EndTime" type="time" class="form-control" />
-                    <span asp-validation-for="EndTime" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <input id="isOnline" asp-for="isOnline" onclick="toggleVisibility()">
-                    <label asp-for="isOnline"> – Is Online</label>
-                </div>
-                <div id="RoomForm" class="form-group">
-                    <label asp-for="Room" class="control-label">Room</label>
-                    <select asp-for="Room" class="form-control" asp-items="ViewBag.Rooms"></select>
-                    <span asp-validation-for="Room" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Comment" class="control-label">Description: </label>
-                    <textarea asp-for="Comment" class="form-control"></textarea>
-                    <span asp-validation-for="Comment" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <input type="submit" value="Create" class="btn btn-primary" />
-                </div>
-
-            </form>
+    </form>
         }
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 <script>
@@ -77,11 +96,12 @@
 
     function toggleVisibility() {
         var checkBox = document.getElementById("isOnline");
-        var roomForm = document.getElementById("RoomForm");
+        //var roomForm = document.getElementById("RoomForm");
         if (checkBox.checked == true) {
-            roomForm.style.display = "none";
+            //roomForm.style.display = "none";
+            $('#RoomForm').hide();
         } else {
-            roomForm.style.display = "block";
+            $('#RoomForm').show();
         }
     }
 </script>
