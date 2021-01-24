@@ -18,7 +18,7 @@ namespace StunduSaraksts.Controllers
         
         public JsonResult ConsultationActualDate(DateTime date)
         {
-            if(DateTime.Compare(date,DateTime.Now.AddDays(1)) >= 0) return Json(true);
+            if(DateTime.Compare(date,DateTime.Now) >= 0) return Json(true);
             else return Json(false);
         }
 
@@ -58,9 +58,9 @@ namespace StunduSaraksts.Controllers
                     }
                     if (reservation != null){
                         var roomObj = _context.Rooms.Find(room);
-                        string message = "Consultation can't be held in room " + roomObj.Name + " on " + reservation.StartTime.Day 
+                        string message = "Konsultāciju nevar rīkot " + roomObj.Name + " kabinetā " + reservation.StartTime.Day 
                             + "/" + reservation.StartTime.Month + "/"+reservation.StartTime.Year
-                            + " from " + reservation.StartTime.TimeOfDay.ToString() + " to " + reservation.EndTime.TimeOfDay.ToString();
+                            + " no " + reservation.StartTime.TimeOfDay.ToString() + " līdz " + reservation.EndTime.TimeOfDay.ToString();
                         return Json(message);
                     }
                     else

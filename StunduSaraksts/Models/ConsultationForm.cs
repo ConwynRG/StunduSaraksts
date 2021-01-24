@@ -14,20 +14,20 @@ namespace StunduSaraksts.Models
         //public int Teacher { get; set; }
         [Required]
         public bool isOnline { get; set; }
-        [Remote("ConsultationExistingReservationCheck", "Validation",AdditionalFields ="Id,isOnline,Date,StartTime,EndTime",ErrorMessage ="Reservation exists of this room exists in given time. Change room or time interval.")]
+        [Remote("ConsultationExistingReservationCheck", "Validation",AdditionalFields ="Id,isOnline,Date,StartTime,EndTime")]
         public int? Room { get; set; }
 
-        [Required(ErrorMessage = "Consultation date can't be empty.")]
-        [Remote("ConsultationActualDate", "Validation", ErrorMessage = "Consultation should start at least day before actual date.")]
+        [Required(ErrorMessage = "Konsultācijas datums nevar būt tukšs.")]
+        [Remote("ConsultationActualDate", "Validation", ErrorMessage = "Konsultāciju ir jāreģestrē vismaz 24 stundas pirms konsultācijas sākuma")]
         public DateTime Date { get; set; }
 
-        [Required(ErrorMessage = "Consultation start time can't be empty.")]
+        [Required(ErrorMessage = "Konsultācijas sākuma laiks nevar būt tukšs.")]
         public TimeSpan StartTime { get; set; }
-        [Required(ErrorMessage = "Consultation end time can't be empty.")]
-        [Remote("ConsultationIntervalCheck","Validation",AdditionalFields ="StartTime",ErrorMessage ="Consultation end time can't be earlier than consultation start time.")]
+        [Required(ErrorMessage = "Konsultācija beiguma laiks nevar būt tukšs.")]
+        [Remote("ConsultationIntervalCheck","Validation",AdditionalFields ="StartTime",ErrorMessage ="Konsultācijas beigu laiks nevar būr agrāks par sākuma laiku")]
         public TimeSpan EndTime { get; set; }
 
-        [Required(ErrorMessage = "Consultation description can't be empty.")]
+        [Required(ErrorMessage = "Konsultāciju apraksts nevar būt tukšs.")]
         public string Comment { get; set; }
     }
 }

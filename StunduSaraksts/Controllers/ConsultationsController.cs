@@ -54,7 +54,10 @@ namespace StunduSaraksts.Controllers
         {
             //var teachers = _context.Teachers.Include(t => t.AccountNavigation);
             //ViewData["Teachers"] = new SelectList(teachers, "Id", "FullName");
-            ViewData["Rooms"] = new SelectList(_context.Rooms, "Id", "Name");   
+            ViewData["Rooms"] = new SelectList(_context.Rooms, "Id", "Name");
+            var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            if (currentUser.IsStudent()) ViewBag.ErrorMessage = "Studentam nav tiesību veidot jaunu konsultāciju. Konsultāciju izveidošana ir iespējama tikai skolotājam vai sistēmas administratoram.";
+
             return View();
         }
 
@@ -69,6 +72,7 @@ namespace StunduSaraksts.Controllers
             if (ModelState.IsValid)
             {
                 var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+                if (currentUser.IsStudent()) RedirectToAction(nameof(Index));
                 Consultation consultation = new Consultation();
                 consultation.RegisterDate = DateTime.Now;
                 consultation.Teacher = currentUser.GetTeacher().Id;
@@ -105,6 +109,7 @@ namespace StunduSaraksts.Controllers
         }
 
         // GET: Consultations/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -138,7 +143,10 @@ namespace StunduSaraksts.Controllers
             consultationForm.Comment = consultation.Comment;
 
             ViewData["Rooms"] = new SelectList(_context.Rooms, "Id", "Name", consultationForm.Room);
-           // ViewData["Teacher"] = new SelectList(_context.Teachers, "Id", "Account", consultation.Teacher);
+            // ViewData["Teacher"] = new SelectList(_context.Teachers, "Id", "Account", consultation.Teacher);
+            var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            if (currentUser.IsStudent()) ViewBag.ErrorMessage = "Studentam nav tiesību rediģēt konsultāciju. Konsultāciju rediģēšana ir iespējama tikai skolotājam vai sistēmas administratoram.";
+            if(!currentUser.IsAdmin() && currentUser.IsTeacher() && currentUser.GetTeacher().Id != consultation.Teacher) ViewBag.ErrorMessage = "Skolotājam ir iespējams rediģēt tikai savas izveidotas konsultācijas.";
             return View(consultationForm);
         }
 
@@ -146,6 +154,7 @@ namespace StunduSaraksts.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,isOnline,Room,Date,StartTime,EndTime,Comment")] ConsultationForm consultationForm)
         {
@@ -158,8 +167,11 @@ namespace StunduSaraksts.Controllers
             {
                 try
                 {
-                    var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
                     var consultation = await _context.Consultations.FindAsync(id);
+
+                    var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+                    if (currentUser.IsStudent() || (!currentUser.IsAdmin() && currentUser.IsTeacher() && currentUser.GetTeacher().Id != consultation.Teacher)) RedirectToAction(nameof(Index));
+                    
                     DateTime startCon = consultationForm.Date.Add(consultationForm.StartTime);
                     DateTime endCon = consultationForm.Date.Add(consultationForm.EndTime);
                     var reservation = (await _context.Reservations.Where(res => res.Id == consultation.RoomReservation).FirstOrDefaultAsync());
