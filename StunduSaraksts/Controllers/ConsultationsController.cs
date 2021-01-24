@@ -30,6 +30,16 @@ namespace StunduSaraksts.Controllers
                                                                     .ThenInclude(rr => rr.RoomNavigation)
                                                               .Include(c => c.TeacherNavigation)
                                                                     .ThenInclude(t => t.AccountNavigation);
+            if (currentUser.IsStudent())
+            {
+                var stud = currentUser.GetStudent();
+                var ca = _context.ConsultationAttendances.Where(ca => ca.Student == stud.Id && ca.Attends==true).Select(o => o.Consultation);
+                var cons = _context.Consultations.Where(c => ca.ToList().Contains(c.Id)).Include(c => c.RoomReservationNavigation)
+                                                                    .ThenInclude(rr => rr.RoomNavigation)
+                                                              .Include(c => c.TeacherNavigation)
+                                                                    .ThenInclude(t => t.AccountNavigation);
+                ViewData["Attendances"] = cons.ToList();
+            }
             return View(await stunduSarakstsContext.ToListAsync());
         }
 

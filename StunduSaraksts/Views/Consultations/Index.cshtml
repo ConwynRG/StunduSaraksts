@@ -234,7 +234,29 @@ else
             }
         </tbody>
         <tbody id="my">
-            
+            @foreach (var item in ((IEnumerable<StunduSaraksts.ModelsDB.Consultation>)ViewData["Attendances"]).ToList().Where(m => m.Canceled != true && m.EndTime > DateTime.Now).OrderBy(m => m.StartTime).Select(m => m))
+            {
+                <tr>
+                    <td>
+                        @item.StartTime.Date.ToString("dd.MM.yyyy")
+                    </td>
+                    <td>
+                        @item.StartTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.EndTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.TeacherNavigation.FullName
+                    </td>
+                    <td>
+                        @((item.RoomReservationNavigation is not null) ? item.RoomReservationNavigation.RoomNavigation.Name : "Tiešsaistē")
+                    </td>
+                    <td>
+                        <a class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id">Skatīt</a>
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 }
