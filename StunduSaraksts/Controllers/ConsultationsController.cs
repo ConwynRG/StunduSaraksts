@@ -5,7 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using StunduSaraksts.Models;
 using StunduSaraksts.ModelsDB;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StunduSaraksts.Controllers
 {
@@ -46,10 +49,12 @@ namespace StunduSaraksts.Controllers
         }
 
         // GET: Consultations/Create
+        [Authorize]
         public IActionResult Create()
         {
-            ViewData["RoomReservation"] = new SelectList(_context.Reservations, "Id", "Owner");
-            ViewData["Teacher"] = new SelectList(_context.Teachers, "Id", "Account");
+            //var teachers = _context.Teachers.Include(t => t.AccountNavigation);
+            //ViewData["Teachers"] = new SelectList(teachers, "Id", "FullName");
+            ViewData["Rooms"] = new SelectList(_context.Rooms, "Id", "Name");   
             return View();
         }
 
@@ -57,18 +62,46 @@ namespace StunduSaraksts.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Teacher,RoomReservation,StartTime,EndTime,RegisterDate,Comment,Canceled")] Consultation consultation)
+        public async Task<IActionResult> Create([Bind("isOnline,Room,Date,StartTime,EndTime,Comment")] ConsultationForm consultationRequest)
         {
             if (ModelState.IsValid)
             {
+                var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+                Consultation consultation = new Consultation();
+                consultation.RegisterDate = DateTime.Now;
+                consultation.Teacher = currentUser.GetTeacher().Id;
+                if(consultationRequest.isOnline == false && consultationRequest.Room.HasValue)
+                {
+                    Reservation reservation = new Reservation();
+                    reservation.Owner = currentUser.Id;
+                    reservation.Room = consultationRequest.Room.Value;
+                    reservation.RequestDate = DateTime.Now;
+                    reservation.StartTime = consultationRequest.Date.Add(consultationRequest.StartTime);
+                    reservation.EndTime = consultationRequest.Date.Add(consultationRequest.EndTime);
+                    reservation.RequestComment = "Consultation: " + consultationRequest.Comment;
+                    reservation.Canceled = false;
+                    _context.Add(reservation);
+                    await _context.SaveChangesAsync();
+                    consultation.RoomReservation = reservation.Id;
+                }
+                else
+                {
+                    consultation.RoomReservation = null; 
+                }
+                consultation.StartTime = consultationRequest.Date.Add(consultationRequest.StartTime);
+                consultation.EndTime = consultationRequest.Date.Add(consultationRequest.EndTime);
+                consultation.Comment = consultationRequest.Comment;
+                consultation.Canceled = false;
                 _context.Add(consultation);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["RoomReservation"] = new SelectList(_context.Reservations, "Id", "Owner", consultation.RoomReservation);
-            ViewData["Teacher"] = new SelectList(_context.Teachers, "Id", "Account", consultation.Teacher);
-            return View(consultation);
+            //var teachers = _context.Teachers.Include(t => t.AccountNavigation);
+            //ViewData["Teachers"] = new SelectList(teachers, "Id", "FullName", consultationRequest.Teacher);
+            ViewData["Rooms"] = new SelectList(_context.Rooms, "Id", "Name", consultationRequest.Room);
+            return View();
         }
 
         // GET: Consultations/Edit/5
@@ -80,13 +113,33 @@ namespace StunduSaraksts.Controllers
             }
 
             var consultation = await _context.Consultations.FindAsync(id);
+
             if (consultation == null)
             {
                 return NotFound();
             }
-            ViewData["RoomReservation"] = new SelectList(_context.Reservations, "Id", "Owner", consultation.RoomReservation);
-            ViewData["Teacher"] = new SelectList(_context.Teachers, "Id", "Account", consultation.Teacher);
-            return View(consultation);
+
+            ConsultationForm consultationForm = new ConsultationForm();
+            consultationForm.Id = consultation.Id;
+
+            if (consultation.RoomReservation != null)
+            {
+                consultationForm.isOnline = false;
+                consultationForm.Room = (await _context.Reservations.Where(res => res.Id == consultation.RoomReservation).FirstOrDefaultAsync()).Room;
+            }
+            else
+            {
+                consultationForm.isOnline = true;
+                consultationForm.Room = null;
+            }
+            consultationForm.Date = consultation.StartTime.Date;
+            consultationForm.StartTime = consultation.StartTime.TimeOfDay;
+            consultationForm.EndTime = consultation.EndTime.TimeOfDay;
+            consultationForm.Comment = consultation.Comment;
+
+            ViewData["Rooms"] = new SelectList(_context.Rooms, "Id", "Name", consultationForm.Room);
+           // ViewData["Teacher"] = new SelectList(_context.Teachers, "Id", "Account", consultation.Teacher);
+            return View(consultationForm);
         }
 
         // POST: Consultations/Edit/5
@@ -94,9 +147,9 @@ namespace StunduSaraksts.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Teacher,RoomReservation,StartTime,EndTime,RegisterDate,Comment,Canceled")] Consultation consultation)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,isOnline,Room,Date,StartTime,EndTime,Comment")] ConsultationForm consultationForm)
         {
-            if (id != consultation.Id)
+            if (id != consultationForm.Id)
             {
                 return NotFound();
             }
@@ -105,12 +158,48 @@ namespace StunduSaraksts.Controllers
             {
                 try
                 {
+                    var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+                    var consultation = await _context.Consultations.FindAsync(id);
+                    DateTime startCon = consultationForm.Date.Add(consultationForm.StartTime);
+                    DateTime endCon = consultationForm.Date.Add(consultationForm.EndTime);
+                    var reservation = (await _context.Reservations.Where(res => res.Id == consultation.RoomReservation).FirstOrDefaultAsync());
+                    bool canceled = false; 
+
+                    if(consultation.RoomReservation != null && (consultationForm.isOnline || 
+                        reservation.Room != consultationForm.Room || consultation.StartTime != startCon || consultation.EndTime != endCon))
+                    {
+                        //Cancel previous reservation for consultation
+                        reservation.Canceled = true;
+                        _context.Update(reservation);
+                        consultation.RoomReservation = null;
+                        _context.Update(consultation);
+                        await _context.SaveChangesAsync();
+                        canceled = true;
+                    }
+
+                    if ((!consultationForm.isOnline && canceled) || (consultation.RoomReservation == null && !consultationForm.isOnline))
+                    {
+                        Reservation newReservation = new Reservation();
+                        newReservation.Owner = currentUser.Id;
+                        newReservation.Room = consultationForm.Room.Value;
+                        newReservation.RequestDate = DateTime.Now;
+                        newReservation.StartTime = startCon;
+                        newReservation.EndTime = endCon;
+                        newReservation.RequestComment = "Consultation: " + consultationForm.Comment;
+                        newReservation.Canceled = false;
+                        _context.Add(newReservation);
+                        await _context.SaveChangesAsync();
+                        consultation.RoomReservation = newReservation.Id;
+                    }
+                    consultation.StartTime = startCon;
+                    consultation.EndTime = endCon;
+                    consultation.Comment = consultationForm.Comment;
                     _context.Update(consultation);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ConsultationExists(consultation.Id))
+                    if (!ConsultationExists(consultationForm.Id))
                     {
                         return NotFound();
                     }
@@ -121,9 +210,9 @@ namespace StunduSaraksts.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["RoomReservation"] = new SelectList(_context.Reservations, "Id", "Owner", consultation.RoomReservation);
-            ViewData["Teacher"] = new SelectList(_context.Teachers, "Id", "Account", consultation.Teacher);
-            return View(consultation);
+            ViewData["Rooms"] = new SelectList(_context.Rooms, "Id", "Name", consultationForm.Room);
+            //ViewData["Teacher"] = new SelectList(_context.Teachers, "Id", "Account", consultation.Teacher);
+            return View(consultationForm);
         }
 
         // GET: Consultations/Delete/5
