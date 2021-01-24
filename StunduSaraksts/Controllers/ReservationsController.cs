@@ -173,7 +173,8 @@ namespace StunduSaraksts.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var reservation = await _context.Reservations.FindAsync(id);
+            //Trace.WriteLine(id);
+            var reservation = _context.Reservations.Include(r => r.OwnerNavigation).Where(r => r.Id == id).FirstOrDefault();
             var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
             if (currentUser.Id == reservation.Owner)
             {
