@@ -161,7 +161,7 @@ namespace StunduSaraksts.Controllers
                             " kabineta tika noraidīta uz laika intervālu " + reservation.StartTime.Day + "." + reservation.StartTime.Month + "." + reservation.StartTime.Year +
                             " no " + reservation.StartTime.TimeOfDay + " līdz " + reservation.EndTime.TimeOfDay;
                     }
-                    contentForReservationOwner.Text += "Administratora komentārs: " + reservation.ReplyComment;
+                    contentForReservationOwner.Text += " Administratora komentārs: " + reservation.ReplyComment;
                     _context.Update(contentForReservationOwner);
                     await _context.SaveChangesAsync();
 

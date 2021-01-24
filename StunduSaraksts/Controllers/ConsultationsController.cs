@@ -49,6 +49,15 @@ namespace StunduSaraksts.Controllers
             {
                 return NotFound();
             }
+            var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            ViewBag.user = currentUser;
+            if (currentUser.IsStudent())
+            {
+                var student = currentUser.GetStudent();
+                var attendance = _context.ConsultationAttendances.Where(ca => ca.Consultation == consultation.Id && ca.Student == student.Id).FirstOrDefault();
+                ViewBag.attendance = attendance;
+                ViewBag.canAttend = DateTime.Compare(consultation.StartTime.Date, DateTime.Now) > 0;
+            }
 
             return View(consultation);
         }
@@ -215,7 +224,7 @@ namespace StunduSaraksts.Controllers
                     await _context.SaveChangesAsync();
                     
                     NotificationContent notificationContent = new NotificationContent();
-                    notificationContent.Text = "Konsultācija, kura tika ieplānota " + consultation.StartTime.Day + "/" + consultation.StartTime.Month + "/" + consultation.StartTime + " "
+                    notificationContent.Text = "Konsultācija, kura tika ieplānota " + consultation.StartTime.Day + "." + consultation.StartTime.Month + "." + consultation.StartTime + " "
                         + consultation.StartTime.TimeOfDay.ToString() + ", tika rediģēta \n";
 
                     if (consultationForm.isOnline) notificationContent.Text += " Notiek tiešsaistē \n";
@@ -306,7 +315,7 @@ namespace StunduSaraksts.Controllers
                     }
                     consultation.Canceled = true;
                     _context.Update(consultation);
-                    notificationContent.Text = "Konsultācija, kura tika ieplānota " + consultation.StartTime.Day + "/" + consultation.StartTime.Month + "/" + consultation.StartTime + " "
+                    notificationContent.Text = "Konsultācija, kura tika ieplānota " + consultation.StartTime.Day + "." + consultation.StartTime.Month + "." + consultation.StartTime + " "
                         + consultation.StartTime.TimeOfDay.ToString() + ", tika atcelta \n Skolotāja komentārs: " + notificationContent.Text;
                     _context.Add(notificationContent);
                     await _context.SaveChangesAsync();

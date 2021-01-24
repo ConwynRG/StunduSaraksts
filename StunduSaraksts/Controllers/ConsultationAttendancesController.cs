@@ -46,46 +46,54 @@ namespace StunduSaraksts.Controllers
         }
 
         // GET: ConsultationAttendances/Create
-        public IActionResult Create()
+        [Route("ConsultationAttendances/{id}/Create")]
+        public IActionResult Create(int id)
         {
-            ViewData["Consultation"] = new SelectList(_context.Consultations, "Id", "Comment");
-            ViewData["Student"] = new SelectList(_context.Students, "Id", "Account");
-            return View();
+            ConsultationAttendance consultationAttendance = new ConsultationAttendance();
+            consultationAttendance.Consultation = id;
+            var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            if (!currentUser.IsStudent()) ViewBag.ErrorMessage = "Pieteikties vai Atteikties no konsultācijas ir iespējams tikai skolēnam";
+
+            return View(consultationAttendance);
         }
 
         // POST: ConsultationAttendances/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Route("ConsultationAttendances/{id}/Create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Student,Consultation,Comment,RegisterDate,Attends")] ConsultationAttendance consultationAttendance)
+        public async Task<IActionResult> Create([Bind("Consultation,Comment")] ConsultationAttendance consultationAttendance)
         {
             if (ModelState.IsValid)
             {
+                var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+                if(!currentUser.IsStudent()) return RedirectToAction("Index", "Consultations");
+
+                consultationAttendance.Attends = true;
+                consultationAttendance.RegisterDate = DateTime.Now;
+                consultationAttendance.Student = currentUser.GetStudent().Id; 
                 _context.Add(consultationAttendance);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "Consultations");
             }
-            ViewData["Consultation"] = new SelectList(_context.Consultations, "Id", "Comment", consultationAttendance.Consultation);
-            ViewData["Student"] = new SelectList(_context.Students, "Id", "Account", consultationAttendance.Student);
             return View(consultationAttendance);
         }
 
         // GET: ConsultationAttendances/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        [Route("ConsultationAttendances/{cons_id}/Edit/{id}")]
+        public async Task<IActionResult> Edit(int cons_id,int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
+            
             var consultationAttendance = await _context.ConsultationAttendances.FindAsync(id);
-            if (consultationAttendance == null)
+            if (consultationAttendance == null || consultationAttendance.Consultation != cons_id)
             {
                 return NotFound();
             }
-            ViewData["Consultation"] = new SelectList(_context.Consultations, "Id", "Comment", consultationAttendance.Consultation);
-            ViewData["Student"] = new SelectList(_context.Students, "Id", "Account", consultationAttendance.Student);
+            var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            if (!currentUser.IsStudent()) ViewBag.ErrorMessage = "Pieteikties vai Atteikties no konsultācijas ir iespējams tikai skolēnam";
+
             return View(consultationAttendance);
         }
 
@@ -93,8 +101,9 @@ namespace StunduSaraksts.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Route("ConsultationAttendances/{cons_id}/Edit/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Student,Consultation,Comment,RegisterDate,Attends")] ConsultationAttendance consultationAttendance)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Consultation,Comment")] ConsultationAttendance consultationAttendance)
         {
             if (id != consultationAttendance.Id)
             {
@@ -105,7 +114,14 @@ namespace StunduSaraksts.Controllers
             {
                 try
                 {
-                    _context.Update(consultationAttendance);
+                    var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+                    if (!currentUser.IsStudent()) return RedirectToAction("Index", "Consultations");
+
+                    var attendance = await _context.ConsultationAttendances.FindAsync(id);
+                    attendance.Attends = !attendance.Attends;
+                    attendance.Comment = consultationAttendance.Comment;
+                    attendance.RegisterDate = DateTime.Now;
+                    _context.Update(attendance);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -119,10 +135,9 @@ namespace StunduSaraksts.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index","Consultations");
             }
-            ViewData["Consultation"] = new SelectList(_context.Consultations, "Id", "Comment", consultationAttendance.Consultation);
-            ViewData["Student"] = new SelectList(_context.Students, "Id", "Account", consultationAttendance.Student);
+            
             return View(consultationAttendance);
         }
 
