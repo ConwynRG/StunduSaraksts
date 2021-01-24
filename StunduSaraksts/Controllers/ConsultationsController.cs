@@ -253,8 +253,19 @@ namespace StunduSaraksts.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var consultation = await _context.Consultations.FindAsync(id);
-            _context.Consultations.Remove(consultation);
-            await _context.SaveChangesAsync();
+            var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            if(currentUser.IsTeacher() && currentUser.GetTeacher().Id == consultation.Id)
+            {
+                if(consultation.RoomReservation != null)
+                {
+                    var reservation = await _context.Reservations.Where(res => res.Id == consultation.RoomReservation).FirstOrDefaultAsync();
+                    reservation.Canceled = true;
+                    _context.Update(reservation);
+                    await _context.SaveChangesAsync();
+                }
+                _context.Update(consultation);
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 

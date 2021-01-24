@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using StunduSaraksts.ModelsDB;
 using StunduSaraksts.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StunduSaraksts.Controllers
 {
@@ -22,6 +23,7 @@ namespace StunduSaraksts.Controllers
 
 
         // GET: Reservations
+        [Authorize]
         public async Task<IActionResult> Index()
         {
 
@@ -55,6 +57,7 @@ namespace StunduSaraksts.Controllers
         }
 
         // GET: Reservations/Create
+        [Authorize]
         public IActionResult Create()
         {
             ViewData["Rooms"] = new SelectList(_context.Rooms, "Id", "Name");
@@ -65,6 +68,7 @@ namespace StunduSaraksts.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Room,Date,StartTime,EndTime,RequestComment")] ReservationForm reservationForm)
         {
@@ -165,12 +169,18 @@ namespace StunduSaraksts.Controllers
 
         // POST: Reservations/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var reservation = await _context.Reservations.FindAsync(id);
-            _context.Reservations.Remove(reservation);
-            await _context.SaveChangesAsync();
+            var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            if (currentUser.Id == reservation.Owner)
+            {
+                reservation.Canceled = true;
+                _context.Update(reservation);
+                await _context.SaveChangesAsync();
+            }
             return RedirectToAction(nameof(Index));
         }
 
