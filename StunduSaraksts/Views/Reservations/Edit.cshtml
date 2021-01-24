@@ -1,4 +1,4 @@
-﻿@model StunduSaraksts.ModelsDB.Reservation
+﻿@model StunduSaraksts.Models.ReservationAdminForm
 
 @{
     ViewData["Title"] = "Edit";
@@ -10,69 +10,61 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Owner" class="control-label"></label>
-                <select asp-for="Owner" class="form-control" asp-items="ViewBag.Owner"></select>
-                <span asp-validation-for="Owner" class="text-danger"></span>
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="alert alert-danger">
+                <p>@ViewBag.ErrorMessage</p>
             </div>
-            <div class="form-group">
-                <label asp-for="Room" class="control-label"></label>
-                <select asp-for="Room" class="form-control" asp-items="ViewBag.Room"></select>
-                <span asp-validation-for="Room" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="StartTime" class="control-label"></label>
-                <input asp-for="StartTime" class="form-control" />
-                <span asp-validation-for="StartTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EndTime" class="control-label"></label>
-                <input asp-for="EndTime" class="form-control" />
-                <span asp-validation-for="EndTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="RequestDate" class="control-label"></label>
-                <input asp-for="RequestDate" class="form-control" />
-                <span asp-validation-for="RequestDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ReplyDate" class="control-label"></label>
-                <input asp-for="ReplyDate" class="form-control" />
-                <span asp-validation-for="ReplyDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="RequestComment" class="control-label"></label>
-                <input asp-for="RequestComment" class="form-control" />
-                <span asp-validation-for="RequestComment" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ReplyComment" class="control-label"></label>
-                <input asp-for="ReplyComment" class="form-control" />
-                <span asp-validation-for="ReplyComment" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Accepted" class="control-label"></label>
-                <input asp-for="Accepted" class="form-control" />
-                <span asp-validation-for="Accepted" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Canceled" class="control-label"></label>
-                <input asp-for="Canceled" class="form-control" />
-                <span asp-validation-for="Canceled" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        }
+        else
+        {
+    <form asp-action="Edit">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="Id" />
+        <div>Kabineta rezervācijas autors: @ViewBag.reservation.OwnerNavigation.FullName </div>
+        <div>Kabineta rezervācijas datums: @ViewBag.reservation.StartTime.Day / @ViewBag.reservation.StartTime.Month / @ViewBag.reservation.StartTime.Year</div>
+        <div>Kabineta rezervācijas sākuma laiks: @ViewBag.reservation.StartTime.TimeOfDay</div>
+        <div> Rezervācijas beigu laiks: @ViewBag.reservation.EndTime.TimeOfDay</div>
+        <div>Kabinets: @ViewBag.reservation.RoomNavigation.Name</div>
+        <div>Autora komentārs: @ViewBag.reservation.RequestComment</div>
+
+        <div class="form-group">
+            <label asp-for="ReplyComment" class="control-label"></label>
+            <input asp-for="ReplyComment" class="form-control" />
+            <span asp-validation-for="ReplyComment" class="text-danger"></span>
+        </div>
+        <input id="accepted" type="hidden" asp-for="Accepted" value="true">
+        <!--
+    <div class="form-group">
+        <label asp-for="Accepted" class="control-label"></label>
+        <input asp-for="Accepted" class="form-control" />
+        <span asp-validation-for="Accepted" class="text-danger"></span>
+    </div>
+        -->
+        <div class="form-group">
+            <input id="allowBtn" type="submit" value="Apstiprināt" class="btn btn-primary" onclick="allowReservation()" />
+            <input id="rejectBtn" type="submit" value="Noraidīt" class="btn btn-danger" onclick="rejectReservation()" />
+        </div>
+    </form>
+        }
     </div>
 </div>
 
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
+
+<script>
+    function allowReservation() {
+        var acc = document.getElementById("accepted");
+        acc.setAttribute("value","true")
+        
+    }
+    function rejectReservation() {
+        var acc = document.getElementById("accepted");
+        acc.setAttribute("value", "false")
+    }
+</script>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

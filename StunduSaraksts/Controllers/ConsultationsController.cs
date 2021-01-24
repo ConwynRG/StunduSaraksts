@@ -24,6 +24,8 @@ namespace StunduSaraksts.Controllers
         // GET: Consultations
         public async Task<IActionResult> Index()
         {
+            var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            ViewData["user"] = currentUser;
             var stunduSarakstsContext = _context.Consultations.Include(c => c.RoomReservationNavigation).Include(c => c.TeacherNavigation);
             return View(await stunduSarakstsContext.ToListAsync());
         }
@@ -84,7 +86,7 @@ namespace StunduSaraksts.Controllers
                     reservation.RequestDate = DateTime.Now;
                     reservation.StartTime = consultationRequest.Date.Add(consultationRequest.StartTime);
                     reservation.EndTime = consultationRequest.Date.Add(consultationRequest.EndTime);
-                    reservation.RequestComment = "Consultation: " + consultationRequest.Comment;
+                    reservation.RequestComment = "Konsultācija: " + consultationRequest.Comment;
                     reservation.Canceled = false;
                     _context.Add(reservation);
                     await _context.SaveChangesAsync();
@@ -197,7 +199,7 @@ namespace StunduSaraksts.Controllers
                         newReservation.RequestDate = DateTime.Now;
                         newReservation.StartTime = startCon;
                         newReservation.EndTime = endCon;
-                        newReservation.RequestComment = "Consultation: " + consultationForm.Comment;
+                        newReservation.RequestComment = "Konsultācija: " + consultationForm.Comment;
                         newReservation.Canceled = false;
                         _context.Add(newReservation);
                         await _context.SaveChangesAsync();

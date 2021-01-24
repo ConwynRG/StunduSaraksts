@@ -99,15 +99,22 @@ namespace StunduSaraksts.Controllers
                 return NotFound();
             }
 
-            var reservation = await _context.Reservations.FindAsync(id);
+            var reservation = await _context.Reservations
+                .Include(r => r.OwnerNavigation)
+                .Include(r => r.RoomNavigation)
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (reservation == null)
             {
                 return NotFound();
             }
-            ViewData["Owner"] = new SelectList(_context.AspNetUsers, "Id", "Id", reservation.Owner);
-            ViewData["Room"] = new SelectList(_context.Rooms, "Id", "Name", reservation.Room);
-            ViewData["Duration"] = reservation.EndTime.TimeOfDay - reservation.StartTime.TimeOfDay;
-            return View(reservation);
+            ViewBag.reservation = reservation;
+            var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            if (!currentUser.IsAdmin()) ViewBag.ErrorMessage = "Kabineta rezervāciju ir iespējams apsiprināt vai noraidīt tikai sistēmas administratoram.";
+            ReservationAdminForm reservationAdminForm = new ReservationAdminForm();
+            reservationAdminForm.Id = reservation.Id;
+            
+
+            return View(reservationAdminForm);
         }
 
         // POST: Reservations/Edit/5
@@ -115,23 +122,92 @@ namespace StunduSaraksts.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Owner,Room,StartTime,EndTime,RequestDate,ReplyDate,RequestComment,ReplyComment,Accepted,Canceled")] Reservation reservation)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,ReplyComment,Accepted")] ReservationAdminForm reservationAdminForm)
         {
-            if (id != reservation.Id)
+            if (id != reservationAdminForm.Id)
             {
                 return NotFound();
             }
+
 
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+                    if (!currentUser.IsAdmin()) return RedirectToAction(nameof(Index));
+
+                    var reservation = await _context.Reservations
+                       .Include(r => r.OwnerNavigation)
+                       .Include(r => r.RoomNavigation)
+                       .FirstOrDefaultAsync(m => m.Id == id);
+                    reservation.ReplyDate = DateTime.Now;
+                    reservation.ReplyComment = reservationAdminForm.ReplyComment;
+                    reservation.Accepted = reservationAdminForm.Accepted;
                     _context.Update(reservation);
+
                     await _context.SaveChangesAsync();
+
+                    NotificationContent contentForReservationOwner = new NotificationContent();
+                    if (reservationAdminForm.Accepted)
+                    {
+                        contentForReservationOwner.Text = "Kabineta rezervācija priekš " + reservation.RoomNavigation.Name +
+                            " kabineta tika apstiprināta uz laika intervālu " + reservation.StartTime.Day + "/" + reservation.StartTime.Month + "/" + reservation.StartTime.Year +
+                            " no " + reservation.StartTime.TimeOfDay + " līdz " + reservation.EndTime.TimeOfDay;
+                    }
+                    else
+                    {
+                        contentForReservationOwner.Text = "Kabineta rezervācija priekš " + reservation.RoomNavigation.Name +
+                            " kabineta tika noraidīta uz laika intervālu " + reservation.StartTime.Day + "/" + reservation.StartTime.Month + "/" + reservation.StartTime.Year +
+                            " no " + reservation.StartTime.TimeOfDay + " līdz " + reservation.EndTime.TimeOfDay;
+                    }
+                    contentForReservationOwner.Text += "Administratora komentārs: " + reservation.ReplyComment;
+                    _context.Update(contentForReservationOwner);
+                    await _context.SaveChangesAsync();
+
+                    Notification notification = new Notification();
+                    notification.Sender = currentUser.Id;
+                    notification.Recipient = reservation.OwnerNavigation.Id;
+                    notification.Content = contentForReservationOwner.Id;
+                    notification.SentTime = DateTime.Now;
+                    _context.Add(notification);
+                    await _context.SaveChangesAsync();
+
+                    var consultation = _context.Consultations.Where(c => c.RoomReservation == reservation.Id).FirstOrDefault();
+                    if(consultation != null)
+                    {
+                        NotificationContent contentForStudents = new NotificationContent();
+                        if (reservationAdminForm.Accepted)
+                        {
+                            contentForStudents.Text = "Kabineta rezervācija priekš " + reservation.RoomNavigation.Name +
+                                " kabineta, kurā tiks rīkota konsultācija, tika apstiprināta uz laika intervālu " + reservation.StartTime.Day + "/" + reservation.StartTime.Month + "/" + reservation.StartTime.Year +
+                                " no " + reservation.StartTime.TimeOfDay + " līdz " + reservation.EndTime.TimeOfDay;
+                        }
+                        else
+                        {
+                            contentForStudents.Text = "Kabineta rezervācija priekš " + reservation.RoomNavigation.Name +
+                                " kabineta, kurā tiks rīkota konsultācija, tika noraidīta uz laika intervālu " + reservation.StartTime.Day + "/" + reservation.StartTime.Month + "/" + reservation.StartTime.Year +
+                                " no " + reservation.StartTime.TimeOfDay + " līdz " + reservation.EndTime.TimeOfDay;
+                        }
+                        _context.Update(contentForStudents);
+                        await _context.SaveChangesAsync();
+
+                        var attendedStudents = _context.ConsultationAttendances.Include(ca => ca.StudentNavigation).Where(ca => ca.Consultation == consultation.Id && ca.Attends == true).ToList();
+                        foreach (var student in attendedStudents)
+                        {
+                            Notification notificationForStudent = new Notification();
+                            notificationForStudent.Sender = currentUser.Id;
+                            notificationForStudent.Recipient = student.StudentNavigation.Account;
+                            notificationForStudent.Content = contentForStudents.Id;
+                            notificationForStudent.SentTime = DateTime.Now;
+                            _context.Add(notificationForStudent);
+                            await _context.SaveChangesAsync();
+                        }
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ReservationExists(reservation.Id))
+                    if (!ReservationExists(reservationAdminForm.Id))
                     {
                         return NotFound();
                     }
@@ -142,9 +218,8 @@ namespace StunduSaraksts.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Owner"] = new SelectList(_context.AspNetUsers, "Id", "Id", reservation.Owner);
-            ViewData["Room"] = new SelectList(_context.Rooms, "Id", "Name", reservation.Room);
-            return View(reservation);
+            
+            return View(reservationAdminForm);
         }
 
         // GET: Reservations/Delete/5
