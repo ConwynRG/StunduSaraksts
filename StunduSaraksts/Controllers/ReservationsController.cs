@@ -28,14 +28,7 @@ namespace StunduSaraksts.Controllers
             //Trace.WriteLine(currentUser);
             //Trace.Write("Id: ");
             //Trace.WriteLine(User.Identity.Name);
-            if (currentUser is not null && currentUser.IsAdmin())
-            {
-                ViewData["admin"] = "Admin";
-            }
-            else
-            {
-                ViewData["admin"] = "Peasant";
-            }
+            ViewData["user"] = currentUser;
             var stunduSarakstsContext = _context.Reservations.Include(r => r.OwnerNavigation).Include(r => r.RoomNavigation);
             return View(await stunduSarakstsContext.ToListAsync());
         }
