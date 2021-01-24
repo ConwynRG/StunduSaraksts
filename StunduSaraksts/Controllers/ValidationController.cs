@@ -62,7 +62,7 @@ namespace StunduSaraksts.Controllers
                     if (reservation != null){
                         var roomObj = _context.Rooms.Find(room);
                         string message = "Konsultāciju nevar rīkot " + roomObj.Name + " kabinetā " + reservation.StartTime.Day 
-                            + "/" + reservation.StartTime.Month + "/"+reservation.StartTime.Year
+                            + "." + reservation.StartTime.Month + "."+reservation.StartTime.Year
                             + " no " + reservation.StartTime.TimeOfDay.ToString() + " līdz " + reservation.EndTime.TimeOfDay.ToString();
                         return Json(message);
                     }
@@ -94,7 +94,7 @@ namespace StunduSaraksts.Controllers
             {
                 var roomObj = _context.Rooms.Find(room);
                 string message = "Kabineta rezervāciju nevar veikt priekš " + roomObj.Name + " kabineta, jo tas tika rezervēts " + reservation.StartTime.Day
-                    + "/" + reservation.StartTime.Month + "/" + reservation.StartTime.Year
+                    + "." + reservation.StartTime.Month + "." + reservation.StartTime.Year
                     + " no " + reservation.StartTime.TimeOfDay.ToString() + " līdz " + reservation.EndTime.TimeOfDay.ToString();
                 return Json(message);
             }

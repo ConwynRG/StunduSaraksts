@@ -152,13 +152,13 @@ namespace StunduSaraksts.Controllers
                     if (reservationAdminForm.Accepted)
                     {
                         contentForReservationOwner.Text = "Kabineta rezervācija priekš " + reservation.RoomNavigation.Name +
-                            " kabineta tika apstiprināta uz laika intervālu " + reservation.StartTime.Day + "/" + reservation.StartTime.Month + "/" + reservation.StartTime.Year +
+                            " kabineta tika apstiprināta uz laika intervālu " + reservation.StartTime.Day + "." + reservation.StartTime.Month + "." + reservation.StartTime.Year +
                             " no " + reservation.StartTime.TimeOfDay + " līdz " + reservation.EndTime.TimeOfDay;
                     }
                     else
                     {
                         contentForReservationOwner.Text = "Kabineta rezervācija priekš " + reservation.RoomNavigation.Name +
-                            " kabineta tika noraidīta uz laika intervālu " + reservation.StartTime.Day + "/" + reservation.StartTime.Month + "/" + reservation.StartTime.Year +
+                            " kabineta tika noraidīta uz laika intervālu " + reservation.StartTime.Day + "." + reservation.StartTime.Month + "." + reservation.StartTime.Year +
                             " no " + reservation.StartTime.TimeOfDay + " līdz " + reservation.EndTime.TimeOfDay;
                     }
                     contentForReservationOwner.Text += "Administratora komentārs: " + reservation.ReplyComment;
@@ -180,13 +180,13 @@ namespace StunduSaraksts.Controllers
                         if (reservationAdminForm.Accepted)
                         {
                             contentForStudents.Text = "Kabineta rezervācija priekš " + reservation.RoomNavigation.Name +
-                                " kabineta, kurā tiks rīkota konsultācija, tika apstiprināta uz laika intervālu " + reservation.StartTime.Day + "/" + reservation.StartTime.Month + "/" + reservation.StartTime.Year +
+                                " kabineta, kurā tiks rīkota konsultācija, tika apstiprināta uz laika intervālu " + reservation.StartTime.Day + "." + reservation.StartTime.Month + "." + reservation.StartTime.Year +
                                 " no " + reservation.StartTime.TimeOfDay + " līdz " + reservation.EndTime.TimeOfDay;
                         }
                         else
                         {
                             contentForStudents.Text = "Kabineta rezervācija priekš " + reservation.RoomNavigation.Name +
-                                " kabineta, kurā tiks rīkota konsultācija, tika noraidīta uz laika intervālu " + reservation.StartTime.Day + "/" + reservation.StartTime.Month + "/" + reservation.StartTime.Year +
+                                " kabineta, kurā tiks rīkota konsultācija, tika noraidīta uz laika intervālu " + reservation.StartTime.Day + "." + reservation.StartTime.Month + "." + reservation.StartTime.Year +
                                 " no " + reservation.StartTime.TimeOfDay + " līdz " + reservation.EndTime.TimeOfDay;
                         }
                         _context.Update(contentForStudents);

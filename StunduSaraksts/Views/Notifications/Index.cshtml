@@ -21,10 +21,10 @@
 @foreach (var item in Model.ToList().Where(i => i.Recipient.Equals(((StunduSaraksts.ModelsDB.AspNetUser)ViewData["user"]).Id)).OrderByDescending(i => i.SentTime).Select(i => i)) {
         <tr class="row">
             <td class="col-sm-2">
-                @item.SentTime.ToString("dd/MM/yyyy HH:mm")
+                @item.SentTime.ToString("dd.MM.yyyy HH:mm")
             </td>
             <td class="col-sm-10">
-                <pre class="text-break" style="font-family: inherit; font-size: inherit">@Html.DisplayFor(modelItem => item.ContentNavigation.Text)</pre>
+                @Html.DisplayFor(modelItem => item.ContentNavigation.Text)
             </td>
         </tr>
 }

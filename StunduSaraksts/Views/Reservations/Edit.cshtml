@@ -4,12 +4,12 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
+<h1>Rezervācija</h1>
 
-<h4>Reservation</h4>
+<h4>Apstiprināt</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-8">
         @if (ViewBag.ErrorMessage != null)
         {
             <div class="alert alert-danger">
@@ -21,16 +21,37 @@
     <form asp-action="Edit">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input type="hidden" asp-for="Id" />
-        <div>Kabineta rezervācijas autors: @ViewBag.reservation.OwnerNavigation.FullName </div>
-        <div>Kabineta rezervācijas datums: @ViewBag.reservation.StartTime.Day / @ViewBag.reservation.StartTime.Month / @ViewBag.reservation.StartTime.Year</div>
-        <div>Kabineta rezervācijas sākuma laiks: @ViewBag.reservation.StartTime.TimeOfDay</div>
-        <div> Rezervācijas beigu laiks: @ViewBag.reservation.EndTime.TimeOfDay</div>
-        <div>Kabinets: @ViewBag.reservation.RoomNavigation.Name</div>
-        <div>Autora komentārs: @ViewBag.reservation.RequestComment</div>
+        <div class="row">
+            <p class="col-sm-2"><b>Autors</b></p>
+            <p class="col-sm-10">@ViewBag.reservation.OwnerNavigation.FullName</p>
+        </div>
+        <div class="row">
+            <p class="col-sm-2"><b>Datums</b></p>
+            <p class="col-sm-10">@ViewBag.reservation.StartTime.ToString("dd.MM.yyyy")</p>
+        </div>
+        <div class="row">
+            <p class="col-sm-2"><b>Sākuma laiks</b></p>
+            <p class="col-sm-10">@ViewBag.reservation.StartTime.TimeOfDay</p>
+        </div>
+        <div class="row">
+            <p class="col-sm-2"><b>Beigu laiks</b></p>
+            <p class="col-sm-10">@ViewBag.reservation.EndTime.TimeOfDay</p>
+        </div>
+        <div class="row">
+            <p class="col-sm-2"><b>Kabineta nr.</b></p>
+            <p class="col-sm-10">@ViewBag.reservation.RoomNavigation.Name</p>
+        </div>
+        <div class="row">
+            <p class="col-sm-2"><b>Autora komentārs</b></p>
+            <p class="col-sm-10">@ViewBag.reservation.RequestComment</p>
+        </div>
 
-        <div class="form-group">
-            <label asp-for="ReplyComment" class="control-label"></label>
-            <input asp-for="ReplyComment" class="form-control" />
+
+        <div class="form-group row">
+            <label asp-for="ReplyComment" class="control-label col-sm-2 col-form-label"><b>Atbildes komentārs</b></label>
+            <div class="col-sm-10">
+                <textarea asp-for="ReplyComment" class="form-control"></textarea>
+            </div>
             <span asp-validation-for="ReplyComment" class="text-danger"></span>
         </div>
         <input id="accepted" type="hidden" asp-for="Accepted" value="true">
@@ -41,17 +62,17 @@
         <span asp-validation-for="Accepted" class="text-danger"></span>
     </div>
         -->
-        <div class="form-group">
-            <input id="allowBtn" type="submit" value="Apstiprināt" class="btn btn-primary" onclick="allowReservation()" />
-            <input id="rejectBtn" type="submit" value="Noraidīt" class="btn btn-danger" onclick="rejectReservation()" />
+        <div class="form-group row">
+            <div class="col-sm-2"></div>
+            <div class="form-group col-sm-10 d-flex justify-content-between">
+                <input id="allowBtn" type="submit" value="Apstiprināt" class="btn btn-primary" onclick="allowReservation()" />
+                <input id="rejectBtn" type="submit" value="Noraidīt" class="btn btn-danger" onclick="rejectReservation()" />
+                <a class="btn btn-secondary" asp-action="Index">Atcelt</a>
+            </div>
         </div>
     </form>
         }
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 <script>

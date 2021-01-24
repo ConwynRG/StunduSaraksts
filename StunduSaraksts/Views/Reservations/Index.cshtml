@@ -12,15 +12,15 @@
     <script type="text/javascript">
         $(window).on('load', function () {
             $('#selector').on('change', function () {
-                if (this.value == "Jaunie") {
+                if (this.value == "Jaunas") {
                     $('#new').show();
                     $('#accepted').hide();
                     $('#declined').hide();
-                } else if (this.value == "Apstiprinātie") {
+                } else if (this.value == "Apstiprinātās") {
                     $('#new').hide();
                     $('#accepted').show();
                     $('#declined').hide();
-                } else if (this.value == "Noraidītie") {
+                } else if (this.value == "Noraidītās") {
                     $('#new').hide();
                     $('#accepted').hide();
                     $('#declined').show();
@@ -35,9 +35,9 @@
     </p>
 
     <select id="selector" class="form-control float-right w-25 mb-1">
-        <option selected>Jaunie</option>
-        <option>Apstiprinātie</option>
-        <option>Noraidītie</option>
+        <option selected>Jaunas</option>
+        <option>Apstiprinātās</option>
+        <option>Noraidītās</option>
     </select>
 
     <table class="table">
@@ -72,7 +72,7 @@
                         @item.OwnerNavigation.FullName
                     </td>
                     <td>
-                        @item.StartTime.Date.ToString("dd/MM/yyyy")
+                        @item.StartTime.Date.ToString("dd.MM.yyyy")
                     </td>
                     <td>
                         @item.StartTime.TimeOfDay.ToString()
@@ -84,12 +84,10 @@
                         @item.RoomNavigation.Name
                     </td>
                     <td>
-                        <pre class="text-break" style="font-family: inherit; font-size: inherit">@Html.DisplayFor(modelItem => item.RequestComment)</pre>
+                        @Html.DisplayFor(modelItem => item.RequestComment)
                     </td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@item.Id">Apstiprināt</a>
                     </td>
                 </tr>
             }
@@ -102,7 +100,7 @@
                         @item.OwnerNavigation.FullName
                     </td>
                     <td>
-                        @item.StartTime.Date.ToString("dd/MM/yyyy")
+                        @item.StartTime.Date.ToString("dd.MM.yyyy")
                     </td>
                     <td>
                         @item.StartTime.TimeOfDay.ToString()
@@ -114,13 +112,9 @@
                         @item.RoomNavigation.Name
                     </td>
                     <td>
-                        <pre class="text-break" style="font-family: inherit; font-size: inherit">@Html.DisplayFor(modelItem => item.RequestComment)</pre>
+                        @Html.DisplayFor(modelItem => item.RequestComment)
                     </td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                    </td>
+                    <td></td>
                 </tr>
             }
         </tbody>
@@ -132,7 +126,7 @@
                         @item.OwnerNavigation.FullName
                     </td>
                     <td>
-                        @item.StartTime.Date.ToString("dd/MM/yyyy")
+                        @item.StartTime.Date.ToString("dd.MM.yyyy")
                     </td>
                     <td>
                         @item.StartTime.TimeOfDay.ToString()
@@ -144,12 +138,9 @@
                         @item.RoomNavigation.Name
                     </td>
                     <td>
-                        <pre class="text-break" style="font-family: inherit; font-size: inherit">@Html.DisplayFor(modelItem => item.RequestComment)</pre>
+                        @Html.DisplayFor(modelItem => item.RequestComment)
                     </td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                     </td>
                 </tr>
             }
@@ -194,7 +185,7 @@ else
             {
                 <tr>
                     <td>
-                        @item.StartTime.Date.ToString("dd/MM/yyyy")
+                        @item.StartTime.Date.ToString("dd.MM.yyyy")
                     </td>
                     <td>
                         @item.StartTime.TimeOfDay.ToString()
@@ -206,13 +197,13 @@ else
                         @item.RoomNavigation.Name
                     </td>
                     <td>
-                        <pre class="text-break" style="font-family: inherit; font-size: inherit">@Html.DisplayFor(modelItem => item.RequestComment)</pre>
+                        @Html.DisplayFor(modelItem => item.RequestComment)
                     </td>
                     <td>
                         @((item.Accepted == null) ? "Nav apskatīts" : (item.Accepted == true) ? "Apstiprināts" : "Noraidīts")
                     </td>
                     <td>
-                        <pre class="text-break" style="font-family: inherit; font-size: inherit">@Html.DisplayFor(modelItem => item.ReplyComment)</pre>
+                        @Html.DisplayFor(modelItem => item.ReplyComment)
                     </td>
                     <td>
                         <form asp-action="Delete">
