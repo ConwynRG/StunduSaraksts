@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using StunduSaraksts.ModelsDB;
+using StunduSaraksts.Models;
 
 namespace StunduSaraksts.Controllers
 {
@@ -56,8 +57,7 @@ namespace StunduSaraksts.Controllers
         // GET: Reservations/Create
         public IActionResult Create()
         {
-            ViewData["Owner"] = new SelectList(_context.AspNetUsers, "Id", "Id");
-            ViewData["Room"] = new SelectList(_context.Rooms, "Id", "Name");
+            ViewData["Rooms"] = new SelectList(_context.Rooms, "Id", "Name");
             return View();
         }
 
@@ -66,17 +66,25 @@ namespace StunduSaraksts.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Owner,Room,StartTime,EndTime,RequestDate,ReplyDate,RequestComment,ReplyComment,Accepted,Canceled")] Reservation reservation)
+        public async Task<IActionResult> Create([Bind("Id,Room,Date,StartTime,EndTime,RequestComment")] ReservationForm reservationForm)
         {
             if (ModelState.IsValid)
             {
+                var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+                Reservation reservation = new Reservation();
+                reservation.Owner = currentUser.Id;
+                reservation.Room = reservationForm.Room;
+                reservation.StartTime = reservationForm.Date.Add(reservationForm.StartTime);
+                reservation.EndTime = reservationForm.Date.Add(reservationForm.EndTime);
+                reservation.RequestDate = DateTime.Now;
+                reservation.RequestComment = reservationForm.RequestComment;
+                reservation.Canceled = false;
                 _context.Add(reservation);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Owner"] = new SelectList(_context.AspNetUsers, "Id", "Id", reservation.Owner);
-            ViewData["Room"] = new SelectList(_context.Rooms, "Id", "Name", reservation.Room);
-            return View(reservation);
+            ViewData["Room"] = new SelectList(_context.Rooms, "Id", "Name", reservationForm.Room);
+            return View();
         }
 
         // GET: Reservations/Edit/5

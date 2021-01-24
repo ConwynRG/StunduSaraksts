@@ -18,13 +18,13 @@ namespace StunduSaraksts.Models
         public int? Room { get; set; }
 
         [Required(ErrorMessage = "Konsultācijas datums nevar būt tukšs.")]
-        [Remote("ConsultationActualDate", "Validation", ErrorMessage = "Konsultāciju ir jāreģestrē vismaz 24 stundas pirms konsultācijas sākuma")]
+        [Remote("ActualDateCheck", "Validation", ErrorMessage = "Konsultāciju ir jāreģestrē vismaz 24 stundas pirms konsultācijas sākuma")]
         public DateTime Date { get; set; }
 
         [Required(ErrorMessage = "Konsultācijas sākuma laiks nevar būt tukšs.")]
         public TimeSpan StartTime { get; set; }
-        [Required(ErrorMessage = "Konsultācija beiguma laiks nevar būt tukšs.")]
-        [Remote("ConsultationIntervalCheck","Validation",AdditionalFields ="StartTime",ErrorMessage ="Konsultācijas beigu laiks nevar būr agrāks par sākuma laiku")]
+        [Required(ErrorMessage = "Konsultācija beigu laiks nevar būt tukšs.")]
+        [Remote("IntervalCheck", "Validation",AdditionalFields ="StartTime",ErrorMessage ="Konsultācijas beigu laiks nevar būr agrāks par sākuma laiku")]
         public TimeSpan EndTime { get; set; }
 
         [Required(ErrorMessage = "Konsultāciju apraksts nevar būt tukšs.")]
