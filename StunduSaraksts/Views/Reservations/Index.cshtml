@@ -4,10 +4,11 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Rezervācijas</h1>
+
 
 @if (((StunduSaraksts.ModelsDB.AspNetUser)ViewData["user"]).IsAdmin())
 {
+    <h1>Rezervācijas</h1>
     <script type="text/javascript">
         $(window).on('load', function () {
             $('#selector').on('change', function () {
@@ -94,7 +95,7 @@
             }
         </tbody>
         <tbody id="accepted">
-            @foreach (var item in Model.ToList().Where(m => m.Canceled != true && m.Accepted==true).OrderBy(m => m.StartTime).Select(m => m))
+            @foreach (var item in Model.ToList().Where(m => m.Canceled != true && m.Accepted == true).OrderBy(m => m.StartTime).Select(m => m))
             {
                 <tr>
                     <td>
@@ -124,7 +125,7 @@
             }
         </tbody>
         <tbody id="declined">
-            @foreach (var item in Model.ToList().Where(m => m.Canceled != true && m.Accepted==false).OrderBy(m => m.StartTime).Select(m => m))
+            @foreach (var item in Model.ToList().Where(m => m.Canceled != true && m.Accepted == false).OrderBy(m => m.StartTime).Select(m => m))
             {
                 <tr>
                     <td>
@@ -144,6 +145,74 @@
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.RequestComment)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <h1>Manas rezervācijas</h1>
+    <p>
+        <a asp-action="Create">Izveidot jaunu</a>
+    </p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Datums
+                </th>
+                <th>
+                    Sākuma laiks
+                </th>
+                <th>
+                    Beigu laiks
+                </th>
+                <th>
+                    Kabinets
+                </th>
+                <th>
+                    Komentārs
+                </th>
+                <th>
+                    Statuss
+                </th>
+                <th>
+                    Administratora komentārs
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="new">
+            @foreach (var item in Model.ToList().Where(m => m.Canceled != true && ((StunduSaraksts.ModelsDB.AspNetUser)ViewData["user"]).Id == m.OwnerNavigation.Id).OrderBy(m => m.StartTime).Select(m => m))
+            {
+                <tr>
+                    <td>
+                        @item.StartTime.Date.ToString("dd/MM/yyyy")
+                    </td>
+                    <td>
+                        @item.StartTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.EndTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.RoomNavigation.Name
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.RequestComment)
+                    </td>
+                    <td>
+                        @((item.Accepted == null) ? "Nav apskatīts" : (item.Accepted == true) ? "Apstiprināts" : "Noraidīts")
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ReplyComment)
                     </td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
