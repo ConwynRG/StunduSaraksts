@@ -10,6 +10,16 @@ namespace StunduSaraksts.ModelsDB
     public partial class AspNetUser
     {
 
+        public string FullName { 
+            get
+            {
+                if (SecondName is not null)
+                    return Name + " " + SecondName + " " + Surname;
+                else
+                    return Name + " " + Surname;
+            }
+        }
+
         /*public bool IsStudent()
         {
             return this.Students.Count > 0;

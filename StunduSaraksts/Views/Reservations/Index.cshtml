@@ -4,86 +4,154 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
-<h2>@ViewData["admin"]</h2>
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.StartTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EndTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.RequestDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ReplyDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.RequestComment)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ReplyComment)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Accepted)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Canceled)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.OwnerNavigation)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.RoomNavigation)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EndTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.RequestDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ReplyDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.RequestComment)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ReplyComment)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Accepted)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Canceled)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.OwnerNavigation.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.RoomNavigation.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+<h1>Rezervācijas</h1>
+
+@if (((StunduSaraksts.ModelsDB.AspNetUser)ViewData["user"]).IsAdmin())
+{
+    <script type="text/javascript">
+        $(window).on('load', function () {
+            $('#selector').on('change', function () {
+                if (this.value == "Jaunie") {
+                    $('#new').show();
+                    $('#accepted').hide();
+                    $('#declined').hide();
+                } else if (this.value == "Apstiprinātie") {
+                    $('#new').hide();
+                    $('#accepted').show();
+                    $('#declined').hide();
+                } else if (this.value == "Noraidītie") {
+                    $('#new').hide();
+                    $('#accepted').hide();
+                    $('#declined').show();
+                }
+            });
+            $('#accepted').hide();
+            $('#declined').hide();
+        });
+    </script>
+    <p>
+        <a asp-action="Create">Izveidot jaunu</a>
+    </p>
+
+    <select id="selector" class="form-control float-right w-25 mb-1">
+        <option selected>Jaunie</option>
+        <option>Apstiprinātie</option>
+        <option>Noraidītie</option>
+    </select>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Lietotājs
+                </th>
+                <th>
+                    Datums
+                </th>
+                <th>
+                    Sākuma laiks
+                </th>
+                <th>
+                    Beigu laiks
+                </th>
+                <th>
+                    Kabinets
+                </th>
+                <th>
+                    Komentārs
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="new">
+            @foreach (var item in Model.ToList().Where(m => m.Canceled != true && m.Accepted is null).OrderBy(m => m.StartTime).Select(m => m))
+            {
+                <tr>
+                    <td>
+                        @item.OwnerNavigation.FullName
+                    </td>
+                    <td>
+                        @item.StartTime.Date.ToString("dd/MM/yyyy")
+                    </td>
+                    <td>
+                        @item.StartTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.EndTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.RoomNavigation.Name
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.RequestComment)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tbody id="accepted">
+            @foreach (var item in Model.ToList().Where(m => m.Canceled != true && m.Accepted==true).OrderBy(m => m.StartTime).Select(m => m))
+            {
+                <tr>
+                    <td>
+                        @item.OwnerNavigation.FullName
+                    </td>
+                    <td>
+                        @item.StartTime.Date.ToString("dd/MM/yyyy")
+                    </td>
+                    <td>
+                        @item.StartTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.EndTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.RoomNavigation.Name
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.RequestComment)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tbody id="declined">
+            @foreach (var item in Model.ToList().Where(m => m.Canceled != true && m.Accepted==false).OrderBy(m => m.StartTime).Select(m => m))
+            {
+                <tr>
+                    <td>
+                        @item.OwnerNavigation.FullName
+                    </td>
+                    <td>
+                        @item.StartTime.Date.ToString("dd/MM/yyyy")
+                    </td>
+                    <td>
+                        @item.StartTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.EndTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.RoomNavigation.Name
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.RequestComment)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
-    </tbody>
-</table>
