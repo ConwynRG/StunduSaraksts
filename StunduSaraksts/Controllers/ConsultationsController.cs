@@ -72,7 +72,7 @@ namespace StunduSaraksts.Controllers
             if (ModelState.IsValid)
             {
                 var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
-                if (currentUser.IsStudent()) RedirectToAction(nameof(Index));
+                if (currentUser.IsStudent()) return RedirectToAction(nameof(Index));
                 Consultation consultation = new Consultation();
                 consultation.RegisterDate = DateTime.Now;
                 consultation.Teacher = currentUser.GetTeacher().Id;
@@ -170,7 +170,7 @@ namespace StunduSaraksts.Controllers
                     var consultation = await _context.Consultations.FindAsync(id);
 
                     var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
-                    if (currentUser.IsStudent() || (!currentUser.IsAdmin() && currentUser.IsTeacher() && currentUser.GetTeacher().Id != consultation.Teacher)) RedirectToAction(nameof(Index));
+                    if (currentUser.IsStudent() || (!currentUser.IsAdmin() && currentUser.IsTeacher() && currentUser.GetTeacher().Id != consultation.Teacher)) return RedirectToAction(nameof(Index));
                     
                     DateTime startCon = consultationForm.Date.Add(consultationForm.StartTime);
                     DateTime endCon = consultationForm.Date.Add(consultationForm.EndTime);
@@ -208,6 +208,34 @@ namespace StunduSaraksts.Controllers
                     consultation.Comment = consultationForm.Comment;
                     _context.Update(consultation);
                     await _context.SaveChangesAsync();
+                    
+                    NotificationContent notificationContent = new NotificationContent();
+                    notificationContent.Text = "Konsultācija, kura tika ieplānota " + consultation.StartTime.Day + "/" + consultation.StartTime.Month + "/" + consultation.StartTime + " "
+                        + consultation.StartTime.TimeOfDay.ToString() + ", tika rediģēta \n";
+
+                    if (consultationForm.isOnline) notificationContent.Text += " Notiek tiešsaistē \n";
+                    else
+                    {
+                        var roomName = _context.Rooms.Find(consultationForm.Room.Value).Name;
+                        notificationContent.Text += "Kabinets: " + roomName + "\n";
+                    }
+                    notificationContent.Text += "Laiks un Datums: " + consultation.StartTime.Day +"/"+consultation.StartTime.Month+"/"+consultation.StartTime.Year+" "
+                        +consultation.StartTime.TimeOfDay+"\n"+"Konsultācijas apraksts: " + consultation.Comment;
+
+                    _context.Add(notificationContent);
+                    await _context.SaveChangesAsync();
+
+                    var attendedStudents = _context.ConsultationAttendances.Include(ca => ca.StudentNavigation).Where(ca => ca.Consultation == consultation.Id && ca.Attends == true).ToList();
+                    foreach (var student in attendedStudents)
+                    {
+                        Notification notification = new Notification();
+                        notification.Sender = currentUser.Id;
+                        notification.Recipient = student.StudentNavigation.Account;
+                        notification.Content = notificationContent.Id;
+                        notification.SentTime = DateTime.Now;
+                        _context.Add(notification);
+                        await _context.SaveChangesAsync();
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -228,6 +256,7 @@ namespace StunduSaraksts.Controllers
         }
 
         // GET: Consultations/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -244,29 +273,58 @@ namespace StunduSaraksts.Controllers
                 return NotFound();
             }
 
-            return View(consultation);
+            ViewBag.ConsultationId = consultation.Id;
+            var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            if (currentUser.IsStudent()) ViewBag.ErrorMessage = "Studentam nav tiesību atcelt konsultāciju. Konsultāciju atcelšana ir iespējama tikai skolotājam vai sistēmas administratoram.";
+            if (!currentUser.IsAdmin() && currentUser.IsTeacher() && currentUser.GetTeacher().Id != consultation.Teacher) ViewBag.ErrorMessage = "Skolotājam ir iespējams atcelt tikai savas izveidotas konsultācijas.";
+            return View();
         }
 
         // POST: Consultations/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id,[Bind("Text")] NotificationContent notificationContent)
         {
-            var consultation = await _context.Consultations.FindAsync(id);
-            var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
-            if(currentUser.IsTeacher() && currentUser.GetTeacher().Id == consultation.Id)
+            if (ModelState.IsValid)
             {
-                if(consultation.RoomReservation != null)
+                var consultation = await _context.Consultations.FindAsync(id);
+                var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+                if (currentUser.IsTeacher() && currentUser.GetTeacher().Id == consultation.Teacher)
                 {
-                    var reservation = await _context.Reservations.Where(res => res.Id == consultation.RoomReservation).FirstOrDefaultAsync();
-                    reservation.Canceled = true;
-                    _context.Update(reservation);
+                    if (consultation.RoomReservation != null)
+                    {
+                        var reservation = await _context.Reservations.Where(res => res.Id == consultation.RoomReservation).FirstOrDefaultAsync();
+                        reservation.Canceled = true;
+                        _context.Update(reservation);
+                        await _context.SaveChangesAsync();
+                    }
+                    consultation.Canceled = true;
+                    _context.Update(consultation);
+                    notificationContent.Text = "Konsultācija, kura tika ieplānota " + consultation.StartTime.Day + "/" + consultation.StartTime.Month + "/" + consultation.StartTime + " "
+                        + consultation.StartTime.TimeOfDay.ToString() + ", tika atcelta \n Skolotāja komentārs: " + notificationContent.Text;
+                    _context.Add(notificationContent);
                     await _context.SaveChangesAsync();
+
+
+                    var attendedStudents = _context.ConsultationAttendances.Include(ca => ca.StudentNavigation).Where(ca => ca.Consultation == consultation.Id && ca.Attends == true).ToList();
+                    foreach (var student in attendedStudents)
+                    {
+                        Notification notification = new Notification();
+                        notification.Sender = currentUser.Id;
+                        notification.Recipient = student.StudentNavigation.Account;
+                        notification.Content = notificationContent.Id;
+                        notification.SentTime = DateTime.Now;
+                        _context.Add(notification);
+                        await _context.SaveChangesAsync();
+                    }
                 }
-                _context.Update(consultation);
-                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
-            return RedirectToAction(nameof(Index));
+            else
+            {
+                return View();
+            }
         }
 
         private bool ConsultationExists(int id)

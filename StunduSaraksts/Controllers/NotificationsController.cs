@@ -21,7 +21,16 @@ namespace StunduSaraksts.Controllers
         // GET: Notifications
         public async Task<IActionResult> Index()
         {
+            var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
+            ViewData["user"] = currentUser;
             var stunduSarakstsContext = _context.Notifications.Include(n => n.ContentNavigation).Include(n => n.RecipientNavigation).Include(n => n.SenderNavigation);
+            var notifications = _context.Notifications.Where(n => n.Recipient == currentUser.Id && n.ReceivedTime == null).ToList();
+            foreach(Notification notification in notifications)
+            {
+                notification.ReceivedTime = DateTime.Now;
+                _context.Update(notification);
+                await _context.SaveChangesAsync();
+            }
             return View(await stunduSarakstsContext.ToListAsync());
         }
 
