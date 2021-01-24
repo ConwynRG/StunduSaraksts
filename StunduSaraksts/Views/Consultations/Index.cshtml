@@ -4,68 +4,237 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.StartTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EndTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.RegisterDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Comment)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Canceled)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.RoomReservationNavigation)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TeacherNavigation)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EndTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.RegisterDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Comment)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Canceled)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.RoomReservationNavigation.Owner)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TeacherNavigation.Account)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+@if (((StunduSaraksts.ModelsDB.AspNetUser)ViewData["user"]).IsAdmin())
+{
+    <h1>Konsultācijas</h1>
+    <script type="text/javascript">
+        $(window).on('load', function () {
+            $('#selector').on('change', function () {
+                if (this.value == "Manas") {
+                    $('#my').show();
+                    $('#all').hide();
+                } else if (this.value == "Visas") {
+                    $('#my').hide();
+                    $('#all').show();
+                }
+            });
+            $('#all').hide();
+        });
+    </script>
+    <p>
+        <a asp-action="Create">Izveidot jaunu</a>
+    </p>
+
+    <select id="selector" class="form-control float-right w-25 mb-1">
+        <option selected>Manas</option>
+        <option>Visas</option>
+    </select>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Datums
+                </th>
+                <th>
+                    Sākuma laiks
+                </th>
+                <th>
+                    Beigu laiks
+                </th>
+                <th>
+                    Pasniedzējs
+                </th>
+                <th>
+                    Kabineta nr.
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="all">
+            @foreach (var item in Model.ToList().Where(m => m.Canceled != true && m.EndTime > DateTime.Now).OrderBy(m => m.StartTime).Select(m => m))
+            {
+                <tr>
+                    <td>
+                        @item.StartTime.Date.ToString("dd/MM/yyyy")
+                    </td>
+                    <td>
+                        @item.StartTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.EndTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.TeacherNavigation.FullName
+                    </td>
+                    <td>
+                        @((item.RoomReservationNavigation is not null) ? item.RoomReservationNavigation.RoomNavigation.Name : "Tiešsaistē")
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tbody id="my">
+            @foreach (var item in Model.ToList().Where(m => m.Canceled != true && m.EndTime > DateTime.Now && m.TeacherNavigation.Account.Equals(((StunduSaraksts.ModelsDB.AspNetUser)ViewData["user"]).Id)).OrderBy(m => m.StartTime).Select(m => m))
+            {
+                <tr>
+                    <td>
+                        @item.StartTime.Date.ToString("dd/MM/yyyy")
+                    </td>
+                    <td>
+                        @item.StartTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.EndTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.TeacherNavigation.FullName
+                    </td>
+                    <td>
+                        @((item.RoomReservationNavigation is not null) ? item.RoomReservationNavigation.RoomNavigation.Name : "Tiešsaistē")
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
-    </tbody>
-</table>
+else if (((StunduSaraksts.ModelsDB.AspNetUser)ViewData["user"]).IsTeacher())
+{
+    <h1>Manas konsultācijas</h1>
+
+    <p>
+        <a asp-action="Create">Izveidot jaunu</a>
+    </p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Datums
+                </th>
+                <th>
+                    Sākuma laiks
+                </th>
+                <th>
+                    Beigu laiks
+                </th>
+                <th>
+                    Pasniedzējs
+                </th>
+                <th>
+                    Kabineta nr.
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.ToList().Where(m => m.Canceled != true && m.EndTime > DateTime.Now && m.TeacherNavigation.Account.Equals(((StunduSaraksts.ModelsDB.AspNetUser)ViewData["user"]).Id)).OrderBy(m => m.StartTime).Select(m => m))
+            {
+                <tr>
+                    <td>
+                        @item.StartTime.Date.ToString("dd/MM/yyyy")
+                    </td>
+                    <td>
+                        @item.StartTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.EndTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.TeacherNavigation.FullName
+                    </td>
+                    <td>
+                        @item.RoomReservationNavigation.RoomNavigation.Name
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <h1>Konsultācijas</h1>
+    <script type="text/javascript">
+        $(window).on('load', function () {
+            $('#selector').on('change', function () {
+                if (this.value == "Manas") {
+                    $('#my').show();
+                    $('#all').hide();
+                } else if (this.value == "Visas") {
+                    $('#my').hide();
+                    $('#all').show();
+                }
+            });
+            $('#all').hide();
+        });
+    </script>
+
+    <select id="selector" class="form-control float-right w-25 mb-1">
+        <option selected>Manas</option>
+        <option>Visas</option>
+    </select>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Datums
+                </th>
+                <th>
+                    Sākuma laiks
+                </th>
+                <th>
+                    Beigu laiks
+                </th>
+                <th>
+                    Pasniedzējs
+                </th>
+                <th>
+                    Kabineta nr.
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="all">
+            @foreach (var item in Model.ToList().Where(m => m.Canceled != true && m.EndTime > DateTime.Now).OrderBy(m => m.StartTime).Select(m => m))
+            {
+                <tr>
+                    <td>
+                        @item.StartTime.Date.ToString("dd/MM/yyyy")
+                    </td>
+                    <td>
+                        @item.StartTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.EndTime.TimeOfDay.ToString()
+                    </td>
+                    <td>
+                        @item.TeacherNavigation.FullName
+                    </td>
+                    <td>
+                        @((item.RoomReservationNavigation is not null) ? item.RoomReservationNavigation.RoomNavigation.Name : "Tiešsaistē")
+                    </td>
+                    <td>
+                        <a class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id">Skatīt</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tbody id="my">
+            
+        </tbody>
+    </table>
+}

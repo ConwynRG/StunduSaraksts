@@ -26,7 +26,10 @@ namespace StunduSaraksts.Controllers
         {
             var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
             ViewData["user"] = currentUser;
-            var stunduSarakstsContext = _context.Consultations.Include(c => c.RoomReservationNavigation).Include(c => c.TeacherNavigation);
+            var stunduSarakstsContext = _context.Consultations.Include(c => c.RoomReservationNavigation)
+                                                                    .ThenInclude(rr => rr.RoomNavigation)
+                                                              .Include(c => c.TeacherNavigation)
+                                                                    .ThenInclude(t => t.AccountNavigation);
             return View(await stunduSarakstsContext.ToListAsync());
         }
 
