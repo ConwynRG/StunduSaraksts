@@ -63,7 +63,7 @@
             <a class="float-right btn btn-secondary" asp-action="Index">Atpakaļ</a>
         </div>
     }
-    @if (ViewBag.user.IsAdmin() || ViewBag.user.IsTeacher() && ViewBag.user.GetTeacher().Id == item.TeacherNavigation.Id)
+    else if (ViewBag.user.IsAdmin() || ViewBag.user.IsTeacher() && ViewBag.user.GetTeacher().Id == item.TeacherNavigation.Id)
     {
         <h5>Pieteicās</h5>
         <table class="table">
@@ -138,9 +138,9 @@
     }
     else
     {
-        <div class="d-flex justify-content-between">
-            <a class="float-right btn btn-secondary" asp-action="Index">Atpakaļ</a>
-        </div>
+    <div class="d-flex justify-content-between">
+        <a class="float-right btn btn-secondary" asp-action="Index">Atpakaļ</a>
+    </div>
     }
 
 </div>
