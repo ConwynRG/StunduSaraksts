@@ -51,8 +51,9 @@
             <label asp-for="ReplyComment" class="control-label col-sm-2 col-form-label"><b>Atbildes komentārs</b></label>
             <div class="col-sm-10">
                 <textarea asp-for="ReplyComment" class="form-control"></textarea>
+                <span asp-validation-for="ReplyComment" class="text-danger"></span>
             </div>
-            <span asp-validation-for="ReplyComment" class="text-danger"></span>
+            
         </div>
         <input id="accepted" type="hidden" asp-for="Accepted" value="true">
         <!--

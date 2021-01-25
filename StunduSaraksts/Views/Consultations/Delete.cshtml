@@ -4,10 +4,10 @@
     ViewData["Title"] = "Delete";
 }
 
-<h1>Cancel</h1>
+<h1>Konsultācija</h1>
 
-<div>
-    <h4>Consultation</h4>
+<div class="col-md-8">
+    <h4>Atcelt</h4>
     <hr />
     @if (ViewBag.ErrorMessage != null)
     {
@@ -16,18 +16,24 @@
         </div>
     }
     else { 
-        <form asp-action="Delete">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <form asp-action="Delete">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <div class="form-group">
-                <label asp-for="Text" class="control-label">Description: </label>
+        <div class="form-group row">
+            <label asp-for="Text" class="control-label col-sm-2 col-form-label">Komentārs</label>
+            <div class="col-sm-10">
                 <textarea asp-for="Text" class="form-control"></textarea>
                 <span asp-validation-for="Text" class="text-danger"></span>
             </div>
-
-            <input type="hidden" name="id" value="@ViewBag.ConsultationId" />
-            <input type="submit" value="Delete" class="btn btn-danger" /> |
-            <a asp-action="Index">Back to List</a>
-        </form>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-2"></div>
+            <div class="form-group col-sm-10">
+                <input type="hidden" name="id" value="@ViewBag.ConsultationId" />
+                <input type="submit" value="Atcelt konsultāciju" class="btn btn-danger" />
+                <a class="float-right btn btn-secondary" asp-action="Index">Atpakaļ</a>
+            </div>
+        </div>
+    </form>
     }
 </div>

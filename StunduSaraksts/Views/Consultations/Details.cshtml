@@ -2,70 +2,147 @@
 
 @{
     ViewData["Title"] = "Details";
+    var item = Model;
 }
 
-<h1>Details</h1>
+<h1>Konsultācija</h1>
 
-<div>
-    <h4>Consultation</h4>
+<div class="col-md-8">
+    <h4>Informācija</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StartTime)
+        <dt class="col-sm-2">
+            Pasniedzējs
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StartTime)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TeacherNavigation.FullName)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EndTime)
+        <dt class="col-sm-2">
+            Datums
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EndTime)
+        <dd class="col-sm-10">
+            @item.StartTime.ToString("dd.MM.yyyy")
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RegisterDate)
+        <dt class="col-sm-2">
+            Sākuma laiks
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RegisterDate)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.StartTime.TimeOfDay)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Comment)
+        <dt class="col-sm-2">
+            Beigu laiks
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.EndTime.TimeOfDay)
+        </dd>
+        <dt class="col-sm-2">
+            Kabineta nr.
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.RoomReservationNavigation.RoomNavigation.Name)
+        </dd>
+        <dt class="col-sm-2">
+            Apraksts
+        </dt>
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Comment)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Canceled)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Canceled)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RoomReservationNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RoomReservationNavigation.Owner)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TeacherNavigation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TeacherNavigation.Account)
-        </dd>
     </dl>
-</div>
-<div>
-    @if (ViewBag.user.IsStudent()) {
-        @if (ViewBag.attendance == null) {
-            <a asp-controller ="ConsultationAttendances" asp-action="Create" asp-route-id="@Model.Id">Pieteikties</a> 
-        }
-        else
-        {
-            <a asp-controller ="ConsultationAttendances" asp-action="Edit" asp-route-cons_id="@Model.Id" asp-route-id="@ViewBag.attendance.Id">Pieteikties/Atteikties</a> 
-        }
+
+    @if (ViewBag.user.IsStudent())
+    {
+        <div class="d-flex justify-content-between">
+            @if (ViewBag.attendance == null)
+            {
+                <a class="btn btn-primary" asp-controller="ConsultationAttendances" asp-action="Create" asp-route-id="@Model.Id">Pieteikties</a>
+            }
+            else
+            {
+                <a class="btn btn-primary" asp-controller="ConsultationAttendances" asp-action="Edit" asp-route-cons_id="@Model.Id" asp-route-id="@ViewBag.attendance.Id">@((ViewBag.attendance.Attends==true) ? "Atteikties" : "Pieteikties")</a>
+            }
+            <a class="float-right btn btn-secondary" asp-action="Index">Atpakaļ</a>
+        </div>
     }
+    @if (ViewBag.user.IsAdmin() || ViewBag.user.IsTeacher() && ViewBag.user.GetTeacher().Id == item.TeacherNavigation.Id)
+    {
+        <h5>Pieteicās</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Skolēns
+                    </th>
+                    <th>
+                        Klase
+                    </th>
+                    <th>
+                        Komentārs
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var i in ((List<StunduSaraksts.ModelsDB.ConsultationAttendance>)ViewBag.members).Where(m => m.Attends == true).Select(m => m))
+                {
+                    <tr>
+                        <td>
+                            @i.StudentNavigation.AccountNavigation.FullName
+                        </td>
+                        <td>
+                            @i.StudentNavigation.ClassNavigation.Name
+                        </td>
+                        <td>
+                            @i.Comment
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <h5>Atteicās</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Skolēns
+                    </th>
+                    <th>
+                        Klase
+                    </th>
+                    <th>
+                        Komentārs
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var i in ((List<StunduSaraksts.ModelsDB.ConsultationAttendance>)ViewBag.members).Where(m => m.Attends == false).Select(m => m))
+                {
+                    <tr>
+                        <td>
+                            @i.StudentNavigation.AccountNavigation.FullName
+                        </td>
+                        <td>
+                            @i.StudentNavigation.ClassNavigation.Name
+                        </td>
+                        <td>
+                            @i.Comment
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-between">
+            <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Id">Rediģēt</a>
+            <a class="btn btn-danger" asp-action="Delete" asp-route-id="@Model.Id">Atcelt konsultāciju</a>
+            <a class="float-right btn btn-secondary" asp-action="Index">Atpakaļ</a>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-between">
+            <a class="float-right btn btn-secondary" asp-action="Index">Atpakaļ</a>
+        </div>
+    }
+
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+

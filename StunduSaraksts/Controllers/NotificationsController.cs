@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ namespace StunduSaraksts.Controllers
         }
 
         // GET: Notifications
+        [Authorize]
         public async Task<IActionResult> Index()
         {
             var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
@@ -35,6 +37,7 @@ namespace StunduSaraksts.Controllers
         }
 
         // GET: Notifications/Details/5
+        [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -56,6 +59,7 @@ namespace StunduSaraksts.Controllers
         }
 
         // GET: Notifications/Create
+        [Authorize]
         public IActionResult Create()
         {
             ViewData["Content"] = new SelectList(_context.NotificationContents, "Id", "Text");
@@ -69,6 +73,7 @@ namespace StunduSaraksts.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Create([Bind("Id,Sender,Recipient,Content,SentTime,ReceivedTime")] Notification notification)
         {
             if (ModelState.IsValid)
@@ -84,6 +89,7 @@ namespace StunduSaraksts.Controllers
         }
 
         // GET: Notifications/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -107,6 +113,7 @@ namespace StunduSaraksts.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Sender,Recipient,Content,SentTime,ReceivedTime")] Notification notification)
         {
             if (id != notification.Id)
@@ -141,6 +148,7 @@ namespace StunduSaraksts.Controllers
         }
 
         // GET: Notifications/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -164,6 +172,7 @@ namespace StunduSaraksts.Controllers
         // POST: Notifications/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var notification = await _context.Notifications.FindAsync(id);

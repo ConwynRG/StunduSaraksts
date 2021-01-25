@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ namespace StunduSaraksts.Controllers
         }
 
         // GET: ConsultationAttendances
+        [Authorize]
         public async Task<IActionResult> Index()
         {
             var stunduSarakstsContext = _context.ConsultationAttendances.Include(c => c.ConsultationNavigation).Include(c => c.StudentNavigation);
@@ -26,6 +28,7 @@ namespace StunduSaraksts.Controllers
         }
 
         // GET: ConsultationAttendances/Details/5
+        [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -47,6 +50,7 @@ namespace StunduSaraksts.Controllers
 
         // GET: ConsultationAttendances/Create
         [Route("ConsultationAttendances/{id}/Create")]
+        [Authorize]
         public IActionResult Create(int id)
         {
             ConsultationAttendance consultationAttendance = new ConsultationAttendance();
@@ -63,6 +67,7 @@ namespace StunduSaraksts.Controllers
         [HttpPost]
         [Route("ConsultationAttendances/{id}/Create")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Create([Bind("Consultation,Comment")] ConsultationAttendance consultationAttendance)
         {
             if (ModelState.IsValid)
@@ -82,6 +87,7 @@ namespace StunduSaraksts.Controllers
 
         // GET: ConsultationAttendances/Edit/5
         [Route("ConsultationAttendances/{cons_id}/Edit/{id}")]
+        [Authorize]
         public async Task<IActionResult> Edit(int cons_id,int id)
         {
 
@@ -103,6 +109,7 @@ namespace StunduSaraksts.Controllers
         [HttpPost]
         [Route("ConsultationAttendances/{cons_id}/Edit/{id}")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Consultation,Comment")] ConsultationAttendance consultationAttendance)
         {
             if (id != consultationAttendance.Id)
@@ -142,6 +149,7 @@ namespace StunduSaraksts.Controllers
         }
 
         // GET: ConsultationAttendances/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -164,6 +172,7 @@ namespace StunduSaraksts.Controllers
         // POST: ConsultationAttendances/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var consultationAttendance = await _context.ConsultationAttendances.FindAsync(id);

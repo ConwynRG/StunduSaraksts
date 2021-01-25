@@ -71,9 +71,7 @@
                         @((item.RoomReservationNavigation is not null) ? item.RoomReservationNavigation.RoomNavigation.Name : "Tiešsaistē")
                     </td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        <a class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id">Apskatīt</a>
                     </td>
                 </tr>
             }
@@ -98,9 +96,7 @@
                         @((item.RoomReservationNavigation is not null) ? item.RoomReservationNavigation.RoomNavigation.Name : "Tiešsaistē")
                     </td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        <a class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id">Apskatīt</a>
                     </td>
                 </tr>
             }
@@ -156,9 +152,7 @@ else if (((StunduSaraksts.ModelsDB.AspNetUser)ViewData["user"]).IsTeacher())
                         @item.RoomReservationNavigation.RoomNavigation.Name
                     </td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        <a class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id">Apskatīt</a>
                     </td>
                 </tr>
             }

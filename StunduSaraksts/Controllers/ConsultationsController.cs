@@ -22,6 +22,7 @@ namespace StunduSaraksts.Controllers
         }
 
         // GET: Consultations
+        [Authorize]
         public async Task<IActionResult> Index()
         {
             var currentUser = _context.AspNetUsers.Where(u => u.UserName == User.Identity.Name).FirstOrDefault();
@@ -44,6 +45,7 @@ namespace StunduSaraksts.Controllers
         }
 
         // GET: Consultations/Details/5
+        [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -53,7 +55,9 @@ namespace StunduSaraksts.Controllers
 
             var consultation = await _context.Consultations
                 .Include(c => c.RoomReservationNavigation)
+                    .ThenInclude(rr => rr.RoomNavigation)
                 .Include(c => c.TeacherNavigation)
+                    .ThenInclude(t => t.AccountNavigation)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (consultation == null)
             {
@@ -67,6 +71,14 @@ namespace StunduSaraksts.Controllers
                 var attendance = _context.ConsultationAttendances.Where(ca => ca.Consultation == consultation.Id && ca.Student == student.Id).FirstOrDefault();
                 ViewBag.attendance = attendance;
                 ViewBag.canAttend = DateTime.Compare(consultation.StartTime.Date, DateTime.Now) > 0;
+            }
+
+            if (currentUser.IsTeacher())
+            {
+                var attendance = _context.ConsultationAttendances.Where(ca => ca.Consultation == consultation.Id)
+                    .Include(c => c.StudentNavigation).ThenInclude(s => s.ClassNavigation)
+                    .Include(c => c.StudentNavigation).ThenInclude(s => s.AccountNavigation).ToList();
+                ViewBag.members = attendance;
             }
 
             return View(consultation);
